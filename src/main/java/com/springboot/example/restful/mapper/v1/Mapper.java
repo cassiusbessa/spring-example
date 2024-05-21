@@ -1,15 +1,13 @@
 package com.springboot.example.restful.mapper.v1;
 
-import com.github.dozermapper.core.Mapper;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.dozermapper.core.DozerBeanMapperBuilder;
+import org.modelmapper.ModelMapper;
 
-public class DozerMapper {
+public class Mapper {
 
-    private static final Mapper mapper = DozerBeanMapperBuilder.buildDefault();
+    private static final ModelMapper mapper = new ModelMapper();
 
     public static <S, D> D map(final S source, final Class<D> destinationClass) {
         return mapper.map(source, destinationClass);

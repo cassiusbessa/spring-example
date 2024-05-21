@@ -1,1 +1,12 @@
-spring.application.name: restful
+spring:
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/spring_rest_example?useTimezone=true&serverTimezone=UTC
+        username: root
+        password: root
+    jpa:
+        open-in-view: false
+        hibernate:
+            ddl-auto: update
+        show-sql: false
+            

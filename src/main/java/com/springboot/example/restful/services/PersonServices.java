@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.springboot.example.restful.dto.v1.PersonDTO;
+import com.springboot.example.restful.dto.v2.PersonDTOV2;
 import com.springboot.example.restful.exceptions.ResourceNotFoundException;
+import com.springboot.example.restful.mapper.PersonMapper;
 import com.springboot.example.restful.mapper.v1.Mapper;
 import com.springboot.example.restful.model.Person;
 import com.springboot.example.restful.repositories.PersonRepository;
@@ -22,6 +24,9 @@ public class PersonServices {
 
     @Autowired
     PersonRepository repository;
+
+    @Autowired
+    PersonMapper mapper;
 
 
     public List<PersonDTO> findAll() {
@@ -41,6 +46,12 @@ public class PersonServices {
         logger.info("Creating a person!");
 
         return Mapper.map(repository.save(Mapper.map(person, Person.class)), PersonDTO.class);
+    }
+
+    public PersonDTOV2 createV2(PersonDTOV2 person) {
+        logger.info("Creating a person!");
+
+        return mapper.map(repository.save(mapper.map(person)));
     }
 
     public PersonDTO update(PersonDTO person) {

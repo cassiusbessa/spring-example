@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.springboot.example.restful.PersonController;
 import com.springboot.example.restful.dto.v1.PersonDTO;
 import com.springboot.example.restful.dto.v2.PersonDTOV2;
 import com.springboot.example.restful.exceptions.ResourceNotFoundException;
@@ -15,6 +16,9 @@ import com.springboot.example.restful.model.Person;
 import com.springboot.example.restful.repositories.PersonRepository;
 
 import java.util.concurrent.atomic.AtomicLong;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
 public class PersonServices {
@@ -39,7 +43,10 @@ public class PersonServices {
         logger.info("Finding one person!");
 
         new Person(counter.incrementAndGet(), "John", "Doe", "Some address", "Male");
-        return Mapper.map(repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No person found with id: " + id)), PersonDTO.class);
+        var dto =  Mapper.map(repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No person found with id: " + id)), PersonDTO.class);
+
+        dto.add(linkTo(methodOn(PersonController.class).findById(id)).withSelfRel());
+        return dto;
     }
 
     public PersonDTO create(PersonDTO person) {
@@ -57,7 +64,7 @@ public class PersonServices {
     public PersonDTO update(PersonDTO person) {
         logger.info("Updating a person!");
 
-        var entity = repository.findById(person.getId()).orElseThrow(() -> new ResourceNotFoundException("No person found with id: " + person.getId()));
+        var entity = repository.findById(person.getKey()).orElseThrow(() -> new ResourceNotFoundException("No person found with id: " + person.getKey()));
 
         entity.setFirstName(person.getFirstName());
         entity.setLastName(person.getLastName());

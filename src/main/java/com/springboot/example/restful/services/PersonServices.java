@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.springboot.example.restful.PersonController;
 import com.springboot.example.restful.dto.v1.PersonDTO;
 import com.springboot.example.restful.dto.v2.PersonDTOV2;
+import com.springboot.example.restful.exceptions.RequiredObjectIsNullException;
 import com.springboot.example.restful.exceptions.ResourceNotFoundException;
 import com.springboot.example.restful.mapper.PersonMapper;
 import com.springboot.example.restful.mapper.v1.Mapper;
@@ -36,7 +37,13 @@ public class PersonServices {
     public List<PersonDTO> findAll() {
         logger.info("Finding all persons!");
 
-        return  Mapper.mapList(repository.findAll(), PersonDTO.class); 
+        var persons = Mapper.mapList(repository.findAll(), PersonDTO.class);
+        
+        for (PersonDTO dto : persons) {
+            dto.add(linkTo(methodOn(PersonController.class).findById(dto.getKey())).withSelfRel());
+        }
+
+        return persons;
     }
 
     public PersonDTO findById(Long id) {
@@ -50,9 +57,17 @@ public class PersonServices {
     }
 
     public PersonDTO create(PersonDTO person) {
+
+        if (person == null) {
+            throw new RequiredObjectIsNullException( );
+        }
+
         logger.info("Creating a person!");
 
-        return Mapper.map(repository.save(Mapper.map(person, Person.class)), PersonDTO.class);
+        var newPerson = Mapper.map(repository.save(Mapper.map(person, Person.class)), PersonDTO.class);
+        
+        newPerson.add(linkTo(methodOn(PersonController.class).findById(newPerson.getKey())).withSelfRel());
+        return newPerson;
     }
 
     public PersonDTOV2 createV2(PersonDTOV2 person) {
@@ -62,6 +77,11 @@ public class PersonServices {
     }
 
     public PersonDTO update(PersonDTO person) {
+
+        if (person == null) {
+            throw new RequiredObjectIsNullException();
+        }
+
         logger.info("Updating a person!");
 
         var entity = repository.findById(person.getKey()).orElseThrow(() -> new ResourceNotFoundException("No person found with id: " + person.getKey()));
@@ -71,7 +91,10 @@ public class PersonServices {
         entity.setAddress(person.getAddress());
         entity.setGender(person.getGender());
 
-        return Mapper.map(repository.save(Mapper.map(person, Person.class)), PersonDTO.class);
+        var updatedPerson = Mapper.map(repository.save(Mapper.map(person, Person.class)), PersonDTO.class);
+
+        updatedPerson.add(linkTo(methodOn(PersonController.class).findById(updatedPerson.getKey())).withSelfRel());
+        return updatedPerson;
     }
 
     public void delete(Long id) {

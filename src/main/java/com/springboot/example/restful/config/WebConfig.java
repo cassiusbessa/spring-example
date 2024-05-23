@@ -16,6 +16,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     private static final MediaType MEDIA_TYPE_YML = MediaType.valueOf("application/x-yaml");
 
+
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        
+        converters.add(new YamlJackson2HttpMessageConverter());
+    }
+
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
 
@@ -33,13 +40,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .mediaType("json", MediaType.APPLICATION_JSON)
                 .mediaType("xml", MediaType.APPLICATION_XML)
                 .mediaType("x-yaml", MEDIA_TYPE_YML);
-    }
-
-    @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        // TODO Auto-generated method stub
-        
-        converters.add(new YamlJackson2HttpMessageConverter());
     }
 
     

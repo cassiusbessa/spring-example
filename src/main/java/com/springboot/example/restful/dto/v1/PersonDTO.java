@@ -69,5 +69,55 @@ public class PersonDTO extends RepresentationModel<PersonDTO> implements Seriali
         this.gender = gender;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
+        result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
+        result = prime * result + ((address == null) ? 0 : address.hashCode());
+        result = prime * result + ((gender == null) ? 0 : gender.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PersonDTO other = (PersonDTO) obj;
+        if (key == null) {
+            if (other.key != null)
+                return false;
+        } else if (!key.equals(other.key))
+            return false;
+        if (firstName == null) {
+            if (other.firstName != null)
+                return false;
+        } else if (!firstName.equals(other.firstName))
+            return false;
+        if (lastName == null) {
+            if (other.lastName != null)
+                return false;
+        } else if (!lastName.equals(other.lastName))
+            return false;
+        if (address == null) {
+            if (other.address != null)
+                return false;
+        } else if (!address.equals(other.address))
+            return false;
+        if (gender == null) {
+            if (other.gender != null)
+                return false;
+        } else if (!gender.equals(other.gender))
+            return false;
+        return true;
+    }
+
+    
     
 }

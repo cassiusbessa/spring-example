@@ -3,6 +3,7 @@ package com.springboot.example.restful.dto.v1;
 import java.io.Serializable;
 
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -82,7 +83,9 @@ public class PersonDTO extends RepresentationModel<PersonDTO> implements Seriali
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
+        if (obj == null)
+            return false;
         if (this == obj)
             return true;
         if (!super.equals(obj))

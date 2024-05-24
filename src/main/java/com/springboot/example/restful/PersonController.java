@@ -3,6 +3,7 @@ package com.springboot.example.restful;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Description;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,27 +14,59 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.springboot.example.restful.dto.v1.PersonDTO;
 import com.springboot.example.restful.dto.v2.PersonDTOV2;
+import com.springboot.example.restful.model.Person;
 import com.springboot.example.restful.services.PersonServices;
 import com.springboot.example.restful.util.MediaType;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/person")
+@Tag(name = "Person", description = "Endpoints for Person")
 public class PersonController {
     
 
     @Autowired
     private PersonServices service;
 
+    @Operation(summary = "Find all people recorded")
+    @Description("This endpoint returns all people recorded in the database")
+    @ApiResponse(responseCode = "200", description = "Success", 
+                content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = PersonDTO.class))))
+    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Not Found")
+    @ApiResponse(responseCode = "500", description = "Internal Server Error")
     @GetMapping(produces = {MediaType.APPLICATION_JSON,  MediaType.APPLICATION_XML, MediaType.APPLICATION_YML})
     public List<PersonDTO> findAll() {
         return service.findAll();
     }
 
+    @Operation(summary = "Find a people by id")
+    @Description("This endpoint returns all people recorded in the database")
+    @ApiResponse(responseCode = "200", description = "Success", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonDTO.class)))
+    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Not Found")
+    @ApiResponse(responseCode = "500", description = "Internal Server Error")
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON,  MediaType.APPLICATION_XML, MediaType.APPLICATION_YML})
     public PersonDTO findById(@PathVariable(value = "id") Long id) {
         return service.findById(id);
     }
 
+
+    @Operation(summary = "Create a new person")
+    @Description("This endpoint creates a new person in the database")
+    @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonDTO.class)))
+    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Not Found")
+    @ApiResponse(responseCode = "500", description = "Internal Server Error")
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON,  MediaType.APPLICATION_XML, MediaType.APPLICATION_YML}, produces = {MediaType.APPLICATION_JSON,  MediaType.APPLICATION_XML, MediaType.APPLICATION_YML})
     public PersonDTO create(@RequestBody PersonDTO person) {
         return service.create(person);
@@ -44,6 +77,12 @@ public class PersonController {
         return service.createV2(person);
     }
 
+    @Operation(summary = "Update a person")
+    @Description("This endpoint updates a person in the database")
+    @ApiResponse(responseCode = "200", description = "Success", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonDTO.class)))
+    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Not Found")
     @RequestMapping(method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON,  MediaType.APPLICATION_XML, MediaType.APPLICATION_YML}, produces = {MediaType.APPLICATION_JSON,  MediaType.APPLICATION_XML, MediaType.APPLICATION_YML})
     public PersonDTO update(@RequestBody PersonDTO person) {
         return service.update(person);

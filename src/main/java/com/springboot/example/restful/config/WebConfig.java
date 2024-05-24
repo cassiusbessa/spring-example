@@ -10,6 +10,7 @@ import com.springboot.example.restful.serialization.converter.YamlJackson2HttpMe
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -18,13 +19,17 @@ public class WebConfig implements WebMvcConfigurer {
 
 
     @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+    public void extendMessageConverters(@Nullable List<HttpMessageConverter<?>> converters) {
+
+        if (converters == null) {
+            return;
+        }
         
         converters.add(new YamlJackson2HttpMessageConverter());
     }
 
     @Override
-    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+    public void configureContentNegotiation(@Nullable ContentNegotiationConfigurer configurer) {
 
         // configurer.favorParameter(true)
         //     .parameterName("mediaType").ignoreAcceptHeader(true)
@@ -32,6 +37,10 @@ public class WebConfig implements WebMvcConfigurer {
         //     .defaultContentType(MediaType.APPLICATION_JSON)
         //     .mediaType("xml", MediaType.APPLICATION_XML)
         //     .mediaType("json", MediaType.APPLICATION_JSON);
+
+        if (configurer == null) {
+            return;
+        }
 
         configurer.favorParameter(false)
             .ignoreAcceptHeader(false)

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.springboot.example.restful.dto.v1.PersonDTO;
 import com.springboot.example.restful.dto.v2.PersonDTOV2;
-import com.springboot.example.restful.model.Person;
 import com.springboot.example.restful.services.PersonServices;
 import com.springboot.example.restful.util.MediaType;
 
@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+// @CrossOrigin
 @RestController
 @RequestMapping("/person")
 @Tag(name = "Person", description = "Endpoints for Person")
@@ -47,6 +48,7 @@ public class PersonController {
         return service.findAll();
     }
 
+    // @CrossOrigin(origins = {"http://localhost:8080", "http://localhost:8081"})
     @Operation(summary = "Find a people by id")
     @Description("This endpoint returns all people recorded in the database")
     @ApiResponse(responseCode = "200", description = "Success", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonDTO.class)))

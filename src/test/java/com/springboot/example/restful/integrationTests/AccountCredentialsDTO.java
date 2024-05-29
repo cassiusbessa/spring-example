@@ -2,6 +2,9 @@ package com.springboot.example.restful.integrationTests;
 
 import java.io.Serializable;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class AccountCredentialsDTO implements Serializable{
 
     private static final long serialVersionUID = 1L;
@@ -9,8 +12,7 @@ public class AccountCredentialsDTO implements Serializable{
     private String username;
     private String password;
 
-    public AccountCredentialsDTO() {
-    }
+    public AccountCredentialsDTO() {}
 
     public AccountCredentialsDTO(String username, String password) {
         this.username = username;

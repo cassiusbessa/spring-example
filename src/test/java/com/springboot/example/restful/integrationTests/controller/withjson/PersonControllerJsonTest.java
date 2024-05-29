@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.example.restful.config.TestConfigs;
+import com.springboot.example.restful.dto.v1.TokenDTO;
+import com.springboot.example.restful.integrationTests.AccountCredentialsDTO;
 import com.springboot.example.restful.integrationTests.PersonDTO;
 import com.springboot.example.restful.integrationTests.testcontainers.AbstractIntegrationTest;
 
@@ -28,7 +30,7 @@ import io.restassured.specification.RequestSpecification;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestMethodOrder(OrderAnnotation.class)
-public class PersonControllerJsonTest extends AbstractIntegrationTest{
+public class PersonControllerJsonTest extends AbstractIntegrationTest {
 	
 	private static RequestSpecification specification;
 	private static ObjectMapper objectMapper;
@@ -44,17 +46,38 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest{
 	}
 	
 	@Test
+	@Order(0)
+	public void authorization() throws JsonMappingException, JsonProcessingException {
+		
+		AccountCredentialsDTO user = new AccountCredentialsDTO("leandro", "admin123");
+		
+		var accessToken = given()
+				.basePath("/auth/signin")
+					.port(TestConfigs.SERVER_PORT)
+					.contentType(TestConfigs.CONTENT_TYPE_JSON)
+				.body(user)
+					.when()
+				.post()
+					.then()
+						.statusCode(200)
+							.extract()
+							.body()
+								.as(TokenDTO.class)
+							.getAccessToken();
+		
+		specification = new RequestSpecBuilder()
+				.addHeader(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + accessToken)
+				.setBasePath("/person")
+				.setPort(TestConfigs.SERVER_PORT)
+					.addFilter(new RequestLoggingFilter(LogDetail.ALL))
+					.addFilter(new ResponseLoggingFilter(LogDetail.ALL))
+				.build();
+	}
+	
+	@Test
 	@Order(1)
 	public void testCreate() throws JsonMappingException, JsonProcessingException {
 		mockPerson();
-		
-		specification = new RequestSpecBuilder()
-			.addHeader(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_GOOGLE)
-			.setBasePath("/person")
-			.setPort(TestConfigs.SERVER_PORT)
-				.addFilter(new RequestLoggingFilter(LogDetail.ALL))
-				.addFilter(new ResponseLoggingFilter(LogDetail.ALL))
-			.build();
 		
 		var content = given().spec(specification)
 				.contentType(TestConfigs.CONTENT_TYPE_JSON)
@@ -78,53 +101,17 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest{
 		assertNotNull(persistedPerson.getAddress());
 		assertNotNull(persistedPerson.getGender());
 		
-		assertTrue(persistedPerson.getId() > 0);
-		
-		assertEquals("John", persistedPerson.getFirstName());
-		assertEquals("Doe", persistedPerson.getLastName());
-		assertEquals("1234 Main St", persistedPerson.getAddress());
-		assertEquals("male", persistedPerson.getGender());
+        assertTrue(persistedPerson.getId() > 0);
+        assertEquals("John", persistedPerson.getFirstName());
+        assertEquals("Doe", persistedPerson.getLastName());
+        assertEquals("1234 Main St", persistedPerson.getAddress());
+        assertEquals("male", persistedPerson.getGender());
 	}
-
-    @Test
-    @Order(2)
-    public void testNotAllowedCORS()  throws JsonMappingException, JsonProcessingException {
-        mockPerson();
-        
-        specification = new RequestSpecBuilder()
-            .addHeader(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_NOT_ALLOWED)
-            .setBasePath("/person")
-            .setPort(TestConfigs.SERVER_PORT)
-                .addFilter(new RequestLoggingFilter(LogDetail.ALL))
-                .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
-            .build();
-        
-        var content = given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
-                    .body(person)
-                    .when()
-                    .post()
-                .then()
-                    .statusCode(403)
-                        .extract()
-                        .body()
-                            .asString();
-        
-        assertTrue(content.contains("Invalid CORS request"));
-    }
 
     @Test
     @Order(3)
     public void testFindById() throws JsonMappingException, JsonProcessingException {
         mockPerson();
-        
-        specification = new RequestSpecBuilder()
-            .addHeader(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_LOCALHOST)
-            .setBasePath("/person")
-            .setPort(TestConfigs.SERVER_PORT)
-                .addFilter(new RequestLoggingFilter(LogDetail.ALL))
-                .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
-            .build();
         
         var content = given().spec(specification)
                 .contentType(TestConfigs.CONTENT_TYPE_JSON)
@@ -154,6 +141,28 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest{
         assertEquals("1234 Main St", persistedPerson.getAddress());
         assertEquals("male", persistedPerson.getGender());
     }
+
+    @Test
+    @Order(2)
+    public void testNotAllowedCORS()  throws JsonMappingException, JsonProcessingException {
+        mockPerson();
+        
+        var content = given().spec(specification)
+                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                    .header(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_NOT_ALLOWED)
+                    .body(person)
+                    .when()
+                    .post()
+                .then()
+                    .statusCode(403)
+                        .extract()
+                        .body()
+                            .asString();
+        
+        assertTrue(content.contains("Invalid CORS request"));
+    }
+
+   
 
     private void mockPerson() {
         person.setId(1L);

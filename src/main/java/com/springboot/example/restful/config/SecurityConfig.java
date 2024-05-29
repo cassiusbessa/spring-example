@@ -14,13 +14,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
+import com.springboot.example.restful.exceptions.CustomAccessDeniedHandler;
+import com.springboot.example.restful.exceptions.CustomAuthenticationEntryPoint;
 import com.springboot.example.restful.securityJwt.JwtTokenFilter;
 import com.springboot.example.restful.securityJwt.JwtTokenProvider;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import javax.crypto.SecretKeyFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +31,12 @@ public class SecurityConfig {
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler; 
+
+    @Autowired
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -58,9 +64,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers("/auth/signin", "/auth/refresh/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/auth/signin", "/auth/refresh/**", "/swagger-ui/**", "/v3/api-docs/**", "/docs").permitAll()
+                        .requestMatchers("/**").authenticated()
                         .requestMatchers("/users").denyAll()
+                        .anyRequest().permitAll()
                 )
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
@@ -69,6 +76,10 @@ public class SecurityConfig {
                     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
                     return config;
                 }))
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                )
                 .addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

@@ -9,8 +9,7 @@ public class AccountCredentialsDTO implements Serializable{
     private String username;
     private String password;
 
-    public AccountCredentialsDTO() {
-    }
+    public AccountCredentialsDTO() {}
 
     public AccountCredentialsDTO(String username, String password) {
         this.username = username;

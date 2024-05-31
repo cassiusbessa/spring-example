@@ -1,4 +1,5 @@
-package com.springboot.example.restful.integrationTests.controller.withjson;
+package com.springboot.example.restful.integrationTests.controller.withxml; 
+
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -15,7 +16,7 @@ import static io.restassured.RestAssured.given;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.springboot.example.restful.config.TestConfigs;
 import com.springboot.example.restful.dto.v1.TokenDTO;
 import com.springboot.example.restful.integrationTests.AccountCredentialsDTO;
@@ -30,16 +31,16 @@ import io.restassured.specification.RequestSpecification;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestMethodOrder(OrderAnnotation.class)
-public class PersonControllerJsonTest extends AbstractIntegrationTest {
+public class PersonControllerXmlTest extends AbstractIntegrationTest {
 	
 	private static RequestSpecification specification;
-	private static ObjectMapper objectMapper;
+	private static XmlMapper objectMapper;
 
 	private static PersonDTO person;
 	
 	@BeforeAll
 	public static void setup() {
-		objectMapper = new ObjectMapper();
+		objectMapper = new XmlMapper();
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		
 		person = new PersonDTO();
@@ -54,7 +55,8 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
 		var accessToken = given()
 				.basePath("/auth/signin")
 					.port(TestConfigs.SERVER_PORT)
-					.contentType(TestConfigs.CONTENT_TYPE_JSON)
+					.contentType(TestConfigs.CONTENT_TYPE_XML)
+                    .accept(TestConfigs.CONTENT_TYPE_XML)
 				.body(user)
 					.when()
 				.post()
@@ -80,7 +82,8 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
 		mockPerson();
 		
 		var content = given().spec(specification)
-				.contentType(TestConfigs.CONTENT_TYPE_JSON)
+				.contentType(TestConfigs.CONTENT_TYPE_XML)
+                .accept(TestConfigs.CONTENT_TYPE_XML)
 					.body(person)
 					.when()
 					.post()
@@ -114,7 +117,8 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         // mockPerson();
         
         var content = given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                .contentType(TestConfigs.CONTENT_TYPE_XML)
+                .accept(TestConfigs.CONTENT_TYPE_XML)
                     .pathParam("id", person.getId())
                     .when()
                     .get("{id}")
@@ -151,7 +155,8 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         person.setAddress("1234 Main St");
         
         var content = given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                .contentType(TestConfigs.CONTENT_TYPE_XML)
+                .accept(TestConfigs.CONTENT_TYPE_XML)
                     .body(person)
                     .when()
                     .put()
@@ -180,7 +185,8 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
     public void delete() throws JsonMappingException, JsonProcessingException {
         
         given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                .contentType(TestConfigs.CONTENT_TYPE_XML)
+                .accept(TestConfigs.CONTENT_TYPE_XML)
                     .pathParam("id", person.getId())
                     .when()
                     .delete("{id}")
@@ -198,7 +204,8 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         mockPerson();
         
         var content = given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                .contentType(TestConfigs.CONTENT_TYPE_XML)
+                .accept(TestConfigs.CONTENT_TYPE_XML)
                     .when()
                     .get()
                 .then()
@@ -216,7 +223,8 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         mockPerson();
         
         given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                .contentType(TestConfigs.CONTENT_TYPE_XML)
+                .accept(TestConfigs.CONTENT_TYPE_XML)
                     .header(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + "invalid_token")
                     .body(person)
                     .when()
@@ -236,7 +244,8 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         mockPerson();
         
         var content = given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                .contentType(TestConfigs.CONTENT_TYPE_XML)
+                .accept(TestConfigs.CONTENT_TYPE_XML)
                     .header(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_NOT_ALLOWED)
                     .body(person)
                     .when()

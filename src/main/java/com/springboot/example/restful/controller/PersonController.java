@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Description;
 import org.springframework.http.ResponseEntity;
 // import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -94,6 +95,18 @@ public class PersonController {
     public ResponseEntity<?> delete(@PathVariable(value = "id") Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Disable a person")
+    @Description("This endpoint disables a person in the database")
+    @ApiResponse(responseCode = "200", description = "Success", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonDTO.class)))
+    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Not Found")
+    @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    @PatchMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON,  MediaType.APPLICATION_XML, MediaType.APPLICATION_YML})
+    public PersonDTO disablePerson(@PathVariable(value = "id") Long id) {
+        return service.disablePerson(id);
     }
 
        

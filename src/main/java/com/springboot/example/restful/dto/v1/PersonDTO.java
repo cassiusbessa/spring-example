@@ -3,7 +3,6 @@ package com.springboot.example.restful.dto.v1;
 import java.io.Serializable;
 
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -19,15 +18,17 @@ public class PersonDTO extends RepresentationModel<PersonDTO> implements Seriali
     private String lastName;
     private String address;
     private String gender;
+    private Boolean enabled;
 
     public PersonDTO() {}
 
-    public PersonDTO(Long key, String firstName, String lastName, String address, String gender) {
+    public PersonDTO(Long key, String firstName, String lastName, String address, String gender, Boolean enabled) {
         this.key = key;
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
         this.gender = gender;
+        this.enabled = enabled;
     }
 
     public Long getKey() {
@@ -70,6 +71,14 @@ public class PersonDTO extends RepresentationModel<PersonDTO> implements Seriali
         this.gender = gender;
     }
 
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -79,13 +88,12 @@ public class PersonDTO extends RepresentationModel<PersonDTO> implements Seriali
         result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
         result = prime * result + ((address == null) ? 0 : address.hashCode());
         result = prime * result + ((gender == null) ? 0 : gender.hashCode());
+        result = prime * result + ((enabled == null) ? 0 : enabled.hashCode());
         return result;
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
-        if (obj == null)
-            return false;
+    public boolean equals(Object obj) {
         if (this == obj)
             return true;
         if (!super.equals(obj))
@@ -118,8 +126,15 @@ public class PersonDTO extends RepresentationModel<PersonDTO> implements Seriali
                 return false;
         } else if (!gender.equals(other.gender))
             return false;
+        if (enabled == null) {
+            if (other.enabled != null)
+                return false;
+        } else if (!enabled.equals(other.enabled))
+            return false;
         return true;
     }
+
+    
 
     
     

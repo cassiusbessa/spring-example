@@ -219,18 +219,24 @@ public class PersonControllerXmlTest extends AbstractIntegrationTest {
         assertTrue(persons.length > 0);
     }
 
+    @Test
+    @Order(6)
     public void testWithInvalidToken() throws JsonMappingException, JsonProcessingException {
-        mockPerson();
+        RequestSpecification specificationWithoutToken = new RequestSpecBuilder()
+        .setBasePath("/person")
+        .setPort(TestConfigs.SERVER_PORT)
+            .addFilter(new RequestLoggingFilter(LogDetail.ALL))
+            .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
+        .build();
         
-        given().spec(specification)
+        given().spec(specificationWithoutToken)
                 .contentType(TestConfigs.CONTENT_TYPE_XML)
                 .accept(TestConfigs.CONTENT_TYPE_XML)
-                    .header(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + "invalid_token")
                     .body(person)
                     .when()
-                    .post()
+                    .get()
                 .then()
-                    .statusCode(403)
+                    .statusCode(401)
                         .extract()
                         .body()
                             .asString();
@@ -267,6 +273,7 @@ public class PersonControllerXmlTest extends AbstractIntegrationTest {
         person.setLastName("Doe");
         person.setAddress("1234 Main St");
         person.setGender("male");
+        person.setEnabled(true);
     }
 
 }

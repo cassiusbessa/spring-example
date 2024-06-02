@@ -15,7 +15,7 @@ public class PersonMapper {
     }
 
     public Person map(PersonDTOV2 person) {
-        return new Person(person.getId(), person.getFirstName(), person.getLastName(), person.getAddress(), person.getGender());
+        return new Person(person.getId(), person.getFirstName(), person.getLastName(), person.getAddress(), person.getGender(), true);
     }
 
 }

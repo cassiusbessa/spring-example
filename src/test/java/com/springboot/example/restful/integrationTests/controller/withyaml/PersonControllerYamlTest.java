@@ -87,6 +87,7 @@ public class PersonControllerYamlTest extends AbstractIntegrationTest {
 		mockPerson();
 		
 		var persistedPerson = given().spec(specification)
+                .header(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + "invalid_token")
                 .config(
                     RestAssuredConfig.config().encoderConfig(
                         EncoderConfig.encoderConfig().encodeContentTypeAs(TestConfigs.CONTENT_TYPE_YAML, ContentType.TEXT)
@@ -199,6 +200,33 @@ public class PersonControllerYamlTest extends AbstractIntegrationTest {
 
     @Test
     @Order(4)
+    public void testDisablePerson() throws JsonMappingException, JsonProcessingException {
+
+        var persistedPerson = given().spec(specification)
+                .config(
+                    RestAssuredConfig.config().encoderConfig(
+                        EncoderConfig.encoderConfig().encodeContentTypeAs(TestConfigs.CONTENT_TYPE_YAML, ContentType.TEXT)
+                    )
+                )
+                .contentType(TestConfigs.CONTENT_TYPE_YAML)
+                .accept(TestConfigs.CONTENT_TYPE_YAML)
+                    .pathParam("id", person.getId())
+                    .when()
+                    .patch("{id}")
+                .then()
+                    .statusCode(200)
+                        .extract()
+                        .body()
+                            .as(PersonDTO.class, objectMapper);
+
+        person = persistedPerson;
+        
+        assertNotNull(persistedPerson);
+        assertFalse(persistedPerson.getEnabled());
+    }
+
+    @Test
+    @Order(5)
     public void delete() throws JsonMappingException, JsonProcessingException {
         
         given().spec(specification)
@@ -220,7 +248,7 @@ public class PersonControllerYamlTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     public void testFindAll() throws JsonMappingException, JsonProcessingException {
         mockPerson();
         
@@ -241,11 +269,17 @@ public class PersonControllerYamlTest extends AbstractIntegrationTest {
 							.as(PersonDTO[].class, objectMapper);        
         assertTrue(persons.length > 0);
     }
-
+    @Test
+    @Order(7)
     public void testWithInvalidToken() throws JsonMappingException, JsonProcessingException {
-        mockPerson();
+        RequestSpecification specificationWithoutToken = new RequestSpecBuilder()
+        .setBasePath("/person")
+        .setPort(TestConfigs.SERVER_PORT)
+            .addFilter(new RequestLoggingFilter(LogDetail.ALL))
+            .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
+        .build();
         
-        given().spec(specification)
+        given().spec(specificationWithoutToken)
                 .contentType(TestConfigs.CONTENT_TYPE_YAML)
                 .config(
                     RestAssuredConfig.config().encoderConfig(
@@ -253,21 +287,19 @@ public class PersonControllerYamlTest extends AbstractIntegrationTest {
                     )
                 )
                 .accept(TestConfigs.CONTENT_TYPE_YAML)
-                    .header(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + "invalid_token")
-                    .body(person)
+                    .body(person, objectMapper)
                     .when()
                     .post()
                 .then()
-                    .statusCode(403)
+                    .statusCode(401)
                         .extract()
                         .body()
                             .asString();
-        
     }
 
 
     @Test
-    @Order(7)
+    @Order(8)
     public void testNotAllowedCORS()  throws JsonMappingException, JsonProcessingException {
         mockPerson();
         
@@ -300,6 +332,7 @@ public class PersonControllerYamlTest extends AbstractIntegrationTest {
         person.setLastName("Doe");
         person.setAddress("1234 Main St");
         person.setGender("male");
+        person.setEnabled(true);
     }
 
 }

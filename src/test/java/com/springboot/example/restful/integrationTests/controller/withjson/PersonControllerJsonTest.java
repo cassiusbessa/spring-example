@@ -177,6 +177,29 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
 
     @Test
     @Order(4)
+    public void testDisablePerson() throws JsonMappingException, JsonProcessingException {
+        // mockPerson();
+        
+        var content = given().spec(specification)
+                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                    .pathParam("id", person.getId())
+                    .when()
+                    .patch("{id}")
+                .then()
+                    .statusCode(200)
+                        .extract()
+                        .body()
+                            .asString();
+        
+        PersonDTO persistedPerson = objectMapper.readValue(content, PersonDTO.class);
+        person = persistedPerson;
+        
+        assertNotNull(persistedPerson);
+        assertFalse(persistedPerson.getEnabled());
+    }
+
+    @Test
+    @Order(5)
     public void delete() throws JsonMappingException, JsonProcessingException {
         
         given().spec(specification)
@@ -193,7 +216,7 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     public void testFindAll() throws JsonMappingException, JsonProcessingException {
         mockPerson();
         
@@ -212,17 +235,24 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         assertTrue(persons.length > 0);
     }
 
+    @Test
+    @Order(7)
     public void testWithInvalidToken() throws JsonMappingException, JsonProcessingException {
-        mockPerson();
+
+        RequestSpecification specificationWithoutToken = new RequestSpecBuilder()
+        .setBasePath("/person")
+        .setPort(TestConfigs.SERVER_PORT)
+            .addFilter(new RequestLoggingFilter(LogDetail.ALL))
+            .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
+        .build();
         
-        given().spec(specification)
+        given().spec(specificationWithoutToken)
                 .contentType(TestConfigs.CONTENT_TYPE_JSON)
-                    .header(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + "invalid_token")
                     .body(person)
                     .when()
                     .post()
                 .then()
-                    .statusCode(403)
+                    .statusCode(401)
                         .extract()
                         .body()
                             .asString();
@@ -258,6 +288,7 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         person.setLastName("Doe");
         person.setAddress("1234 Main St");
         person.setGender("male");
+        person.setEnabled(true);
     }
 
 }

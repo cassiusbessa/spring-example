@@ -16,15 +16,13 @@ import com.springboot.example.restful.mapper.v1.Mapper;
 import com.springboot.example.restful.model.Person;
 import com.springboot.example.restful.repositories.PersonRepository;
 
-import java.util.concurrent.atomic.AtomicLong;
+import jakarta.transaction.Transactional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
 public class PersonServices {
-
-    private final AtomicLong counter = new AtomicLong();
     private Logger logger = Logger.getLogger(PersonServices.class.getName());
 
     @Autowired
@@ -49,7 +47,6 @@ public class PersonServices {
     public PersonDTO findById(Long id) {
         logger.info("Finding one person!");
 
-        new Person(counter.incrementAndGet(), "John", "Doe", "Some address", "Male");
         var dto =  Mapper.map(repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No person found with id: " + id)), PersonDTO.class);
 
         dto.add(linkTo(methodOn(PersonController.class).findById(id)).withSelfRel());
@@ -103,6 +100,20 @@ public class PersonServices {
         var entity = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No person found with id: " + id));
 
         repository.delete(entity);        
+    }
+
+    @Transactional
+    public PersonDTO disablePerson(Long id) {
+        logger.info("Disabling a person!");
+
+        repository.disablePerson(id);
+
+        var entity = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No person found with id: " + id));
+
+        var person = Mapper.map(entity, PersonDTO.class);
+
+        person.add(linkTo(methodOn(PersonController.class).findById(person.getKey())).withSelfRel());
+        return person;
     }
 
 }

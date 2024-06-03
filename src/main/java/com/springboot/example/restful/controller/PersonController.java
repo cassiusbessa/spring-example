@@ -61,6 +61,25 @@ public class PersonController {
         return ResponseEntity.ok(service.findAll(pageable));
     }
 
+    @Operation(summary = "Find people by name")
+    @Description("This endpoint returns all people recorded in the database by name")
+    @ApiResponse(responseCode = "200", description = "Success", 
+                content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = PersonDTO.class))))
+    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Not Found")
+    @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    @GetMapping(value = "/findPersonByName/{firstName}", produces = {MediaType.APPLICATION_JSON,  MediaType.APPLICATION_XML, MediaType.APPLICATION_YML})
+    public ResponseEntity<PagedModel<EntityModel<PersonDTO>>> findPersonByName(@PathVariable(value = "firstName") String firstName,
+        @RequestParam(value = "page", defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "12") Integer size, 
+        @RequestParam(value = "direction", defaultValue = "asc") String direction){
+
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "firstName"));
+        return ResponseEntity.ok(service.findPersonsByName(firstName, pageable));
+    }
+
+
     // @CrossOrigin(origins = {"http://localhost:8080", "http://localhost:8081"})
     @Operation(summary = "Find a people by id")
     @Description("This endpoint returns all people recorded in the database")

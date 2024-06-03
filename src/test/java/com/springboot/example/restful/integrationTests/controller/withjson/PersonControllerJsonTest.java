@@ -241,6 +241,33 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
 
     @Test
     @Order(7)
+    public void testFindByNames() throws JsonMappingException, JsonProcessingException {
+        mockPerson();
+        
+        var content = given().spec(specification)
+                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                .pathParam("firstName", "Cassius")
+                .queryParams("page", 0, "size", 10, "direction", "desc")
+                    .when()
+                    .get("findPersonByName/{firstName}")
+                .then()
+                    .statusCode(200)
+                        .extract()
+                        .body()
+                            .asString();
+        
+        WrapperPersonDTO wrapper = objectMapper.readValue(content, WrapperPersonDTO.class);
+        var persons = wrapper.getEmbedded().getPersons();
+
+        var cassius = persons.get(0);
+        
+        assertNotNull(persons);
+        assertTrue(persons.size() > 0);
+        assertEquals("Cássius", cassius.getFirstName());
+    }
+
+    @Test
+    @Order(8)
     public void testWithInvalidToken() throws JsonMappingException, JsonProcessingException {
 
         RequestSpecification specificationWithoutToken = new RequestSpecBuilder()
@@ -265,7 +292,7 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
 
 
     @Test
-    @Order(7)
+    @Order(9)
     public void testNotAllowedCORS()  throws JsonMappingException, JsonProcessingException {
         mockPerson();
         

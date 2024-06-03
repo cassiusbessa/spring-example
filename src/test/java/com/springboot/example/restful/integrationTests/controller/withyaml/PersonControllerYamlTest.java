@@ -18,7 +18,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.springboot.example.restful.config.TestConfigs;
 import com.springboot.example.restful.dto.v1.TokenDTO;
 import com.springboot.example.restful.integrationTests.AccountCredentialsDTO;
+import com.springboot.example.restful.integrationTests.PagedModelPerson;
 import com.springboot.example.restful.integrationTests.PersonDTO;
+import com.springboot.example.restful.integrationTests.WrapperPersonDTO;
 import com.springboot.example.restful.integrationTests.testcontainers.AbstractIntegrationTest;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -252,13 +254,14 @@ public class PersonControllerYamlTest extends AbstractIntegrationTest {
     public void testFindAll() throws JsonMappingException, JsonProcessingException {
         mockPerson();
         
-        var persons = given().spec(specification)
+        var wrapper = given().spec(specification)
                 .config(
                     RestAssuredConfig.config().encoderConfig(
                         EncoderConfig.encoderConfig().encodeContentTypeAs(TestConfigs.CONTENT_TYPE_YAML, ContentType.TEXT)
                     )
                 )
                 .contentType(TestConfigs.CONTENT_TYPE_YAML)
+                .queryParams("page", 0, "size", 10, "direction", "desc")
                 .accept(TestConfigs.CONTENT_TYPE_YAML)
                     .when()
                     .get()
@@ -266,8 +269,12 @@ public class PersonControllerYamlTest extends AbstractIntegrationTest {
                     .statusCode(200)
                         .extract()
                         .body()
-							.as(PersonDTO[].class, objectMapper);        
-        assertTrue(persons.length > 0);
+							.as(PagedModelPerson.class, objectMapper);  
+                            
+        var persons = wrapper.getContent();
+        
+        assertNotNull(persons);
+        assertTrue(persons.size() > 0);
     }
     @Test
     @Order(7)

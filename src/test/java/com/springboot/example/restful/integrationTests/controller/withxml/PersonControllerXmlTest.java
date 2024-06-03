@@ -20,7 +20,9 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.springboot.example.restful.config.TestConfigs;
 import com.springboot.example.restful.dto.v1.TokenDTO;
 import com.springboot.example.restful.integrationTests.AccountCredentialsDTO;
+import com.springboot.example.restful.integrationTests.PagedModelPerson;
 import com.springboot.example.restful.integrationTests.PersonDTO;
+import com.springboot.example.restful.integrationTests.WrapperPersonDTO;
 import com.springboot.example.restful.integrationTests.testcontainers.AbstractIntegrationTest;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -205,6 +207,7 @@ public class PersonControllerXmlTest extends AbstractIntegrationTest {
         
         var content = given().spec(specification)
                 .contentType(TestConfigs.CONTENT_TYPE_XML)
+                .queryParams("page", 0, "size", 10, "direction", "desc")
                 .accept(TestConfigs.CONTENT_TYPE_XML)
                     .when()
                     .get()
@@ -214,9 +217,12 @@ public class PersonControllerXmlTest extends AbstractIntegrationTest {
                         .body()
                             .asString();
         
-        PersonDTO[] persons = objectMapper.readValue(content, PersonDTO[].class);
+        PagedModelPerson wrapper = objectMapper.readValue(content, PagedModelPerson.class);
+        var persons = wrapper.getContent();
         
-        assertTrue(persons.length > 0);
+        assertNotNull(persons);
+        assertTrue(persons.size() > 0);
+        assertTrue(persons.size() <= 10);
     }
 
     @Test

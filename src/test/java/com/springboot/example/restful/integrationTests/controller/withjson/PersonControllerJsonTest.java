@@ -20,6 +20,7 @@ import com.springboot.example.restful.config.TestConfigs;
 import com.springboot.example.restful.dto.v1.TokenDTO;
 import com.springboot.example.restful.integrationTests.AccountCredentialsDTO;
 import com.springboot.example.restful.integrationTests.PersonDTO;
+import com.springboot.example.restful.integrationTests.WrapperPersonDTO;
 import com.springboot.example.restful.integrationTests.testcontainers.AbstractIntegrationTest;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -222,6 +223,7 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         
         var content = given().spec(specification)
                 .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                .queryParams("page", 0, "size", 10, "direction", "desc")
                     .when()
                     .get()
                 .then()
@@ -230,9 +232,11 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
                         .body()
                             .asString();
         
-        PersonDTO[] persons = objectMapper.readValue(content, PersonDTO[].class);
+        WrapperPersonDTO wrapper = objectMapper.readValue(content, WrapperPersonDTO.class);
+        var persons = wrapper.getEmbedded().getPersons();
         
-        assertTrue(persons.length > 0);
+        assertNotNull(persons);
+        assertTrue(persons.size() > 0);
     }
 
     @Test

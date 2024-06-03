@@ -4,6 +4,12 @@ import java.util.logging.Logger;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
 import com.springboot.example.restful.controller.PersonController;
@@ -31,17 +37,20 @@ public class PersonServices {
     @Autowired
     PersonMapper mapper;
 
+    @Autowired
+    PagedResourcesAssembler<PersonDTO> assembler;
 
-    public List<PersonDTO> findAll() {
+
+    public PagedModel<EntityModel<PersonDTO>> findAll(Pageable pageable) {
         logger.info("Finding all persons!");
 
-        var persons = Mapper.mapList(repository.findAll(), PersonDTO.class);
-        
-        for (PersonDTO dto : persons) {
+        var persons = repository.findAll(pageable).map(entity -> {
+            var dto = Mapper.map(entity, PersonDTO.class);
             dto.add(linkTo(methodOn(PersonController.class).findById(dto.getKey())).withSelfRel());
-        }
-
-        return persons;
+            return dto;
+        });
+        Link link = linkTo(methodOn(PersonController.class).findAll(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort().toString())).withSelfRel();
+        return assembler.toModel(persons, link);
     }
 
     public PersonDTO findById(Long id) {

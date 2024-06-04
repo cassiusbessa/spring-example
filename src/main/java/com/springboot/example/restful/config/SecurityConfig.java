@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import com.springboot.example.restful.exceptions.CustomAccessDeniedHandler;
 import com.springboot.example.restful.exceptions.CustomAuthenticationEntryPoint;
@@ -60,20 +62,20 @@ public class SecurityConfig {
         JwtTokenFilter customFilter = new JwtTokenFilter(tokenProvider);
         
         return http
-                .httpBasic(basic -> basic.disable())
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers("/auth/signin", "/auth/refresh/**", "/swagger-ui/**", "/v3/api-docs/**", "/docs").permitAll()
-                        .requestMatchers("/**").authenticated()
+                        .requestMatchers("/auth/signin", "/auth/refresh/**", "/swagger-ui/**", "/api-docs/**", "/docs", "http://localhost:8080/api-docs/swagger-config").permitAll()
                         .requestMatchers("/users").denyAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("localhost:8080"));
+                    config.setAllowedOrigins(List.of("http://localhost:8080"));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+                    config.setAllowCredentials(true);
                     return config;
                 }))
                 .exceptionHandling(exceptionHandling -> exceptionHandling
@@ -82,6 +84,18 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:8080"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowCredentials(true);
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
     }
 }
 

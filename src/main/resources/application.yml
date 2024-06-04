@@ -1,5 +1,7 @@
 cors: 
     originPatterns: "https://www.google.com.br/"
+file:
+    upload-dir: /udemy/restful/src/upload
 security:
     jwt:
         token:
@@ -19,6 +21,12 @@ spring:
         hibernate:
             ddl-auto: none
         show-sql: false
+    servlet:
+        multipart:
+            enabled: true
+            file-size-threshold: 2KB
+            max-file-size: 500MB
+            max-request-size: 550MB
 springdoc:
     api-docs:
         path: /api-docs

@@ -3,15 +3,17 @@ package com.springboot.example.restful.services;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.springboot.example.restful.config.FileStorageConfig;
 import com.springboot.example.restful.exceptions.FileStorageException;
+import com.springboot.example.restful.exceptions.ResourceNotFoundException;
 
 @Service
 public class FileStorageService {
@@ -48,5 +50,23 @@ public class FileStorageService {
             throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
         }
     }
+
+    public Resource loadFileAsResource(String fileName) {
+        try {
+            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists()) {
+                return resource;
+            } else {
+                System.out.println("fileName: " + fileName);
+                throw new ResourceNotFoundException("File not found " + fileName);
+            }
+        } catch (Exception ex) {
+            System.out.println("fileName: " + fileName);
+            throw new ResourceNotFoundException("File not found " + fileName, ex);
+        }
+    }
+
+
 
 }

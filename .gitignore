@@ -16,7 +16,7 @@ target/
 # Package Files #
 *.jar
 *.war
-*.nar
+*.nar'
 *.ear
 *.zip
 *.tar.gz
@@ -40,3 +40,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Upload/Download ###
+/src/upload

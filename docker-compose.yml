@@ -1,0 +1,42 @@
+version: '3.9'
+services:
+  db:
+    image: mysql:8.0.29
+    restart: always
+    container_name: mysql
+    environment:
+      TZ: America/Sao_Paulo
+      MYSQL_ROOT_PASSWORD: admin123
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: admin123
+      MYSQL_DATABASE: spring_rest_example
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_TCP_PORT: 3308
+    ports:
+      - "3308:3308"
+    expose:
+      - "3308"
+    networks:
+      - erudio-network
+  spring-rest-example:
+    image: cassiusbessa/spring-rest-example
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /spring-rest-example
+    environment:
+      TZ: America/Sao_Paulo
+      SPRING.DATASOURCE.URL: jdbc:mysql://db:3308/spring_rest_example?createDatabaseIfNotExist=true&useTimezone=true&serverTimezone=UTC
+      SPRING.DATASOURCE.USERNAME: root
+      SPRING.DATASOURCE.PASSWORD: admin123
+    ports:
+      - "8080:8080"
+    command: mvn spring-boot:run
+    depends_on:
+      - db
+    networks:
+      - erudio-network
+networks:
+  erudio-network:
+    driver: bridge

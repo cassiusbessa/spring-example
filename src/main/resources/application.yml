@@ -1,3 +1,5 @@
+server:
+    port: 80
 cors: 
     originPatterns: "https://www.google.com.br/"
 file:
@@ -13,9 +15,9 @@ spring:
         url: jdbc:mysql://localhost:3306/spring_rest_example?createDatabaseIfNotExist=true&useTimezone=true&serverTimezone=UTC
         username: root
         password: root
-    flyway:
-        locations: classpath:db/migration
-        schemas: spring_rest_example
+    # flyway:
+    #     locations: classpath:db/migration
+    #     schemas: spring_rest_example
     jpa:
         open-in-view: false
         hibernate:

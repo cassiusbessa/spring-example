@@ -1,5 +1,5 @@
 file:
-    upload-dir: /udemy/restful/src/upload
+    upload-dir: /home/runner/work/spring-example/UploadDir
 server:
     port: 8888
 security:
